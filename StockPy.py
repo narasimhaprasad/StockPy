@@ -77,7 +77,7 @@ def stocksel(label):
                      (ymin+0.05)*np.ones(len(stock.index)),alpha=0.5)
       
     bot.bar(stock.index,stock['Volume'])
-    bot.set_title('%s Trading Volume in Millions' %(stockname))
+    bot.set_title('%s Trading Volume' %(stockname))
     
     n,bins,patches = sid.hist(stock['High']-stock['Low'],bins=50,normed=True)
     sid.set_title('Stock Value Variation')
