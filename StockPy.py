@@ -37,7 +37,7 @@ top.fill_between(stock.index,stock['Close'],
 
 #Bottom plot contains the trading volumes of the stock  
 bot.bar(stock.index,stock['Volume'])
-bot.set_title('%s Trading Volume in Millions' %(stockname))
+bot.set_title('%s Trading Volume' %(stockname))
 
 #Side plot contains the histogram of stock value variation
 n,bins,patches = sid.hist(stock['High']-stock['Low'],bins=50,normed=True)
