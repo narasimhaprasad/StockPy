@@ -21,6 +21,11 @@ def plot_data(stkname, fig, topplt, botplt, sidplt):
     #Decoration for annotation of latest trading value
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 
+    #Clear all axes
+    topplt.cla()
+    botplt.cla()
+    sidplt.cla()
+
     #Top plot: Closing data, mean and rolling mean
     topplt.plot(stkdata.index, stkdata['Close'], stkdata.index,
                 stkmean*np.ones(stklen), stkdata.index, stkrolmean)
@@ -72,12 +77,8 @@ if __name__ == "__main__":
     multi = wd.MultiCursor(fig.canvas, (top, bot), color='r', lw=2)
 
     def stocksel(label):
-        #Clear all axes
-        top.cla()
-        bot.cla()
-        sid.cla()
-
         plot_data(label, fig, top, bot, sid)
+
     radio.on_clicked(stocksel)
 
    #Show plot
