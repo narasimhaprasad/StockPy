@@ -39,7 +39,7 @@ if __name__ == "__main__":
                     stkcur), transform=top.transAxes, fontsize=14,
                     verticalalignment='top', bbox=props)
         topplt.fill_between(stkdata.index, stkdata['Close'],
-                            (topymin+0.1)*np.ones(stklen), alpha=0.5)
+                            (topymin+0.01)*np.ones(stklen), alpha=0.5)
 
         #Bottom plot: Bar Graph, trading volume
         botplt.bar(stkdata.index, stkdata['Volume'])
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         sidplt.grid(True)
 
         #Remove xticklabels on top plot
-        plt.setp(top.get_xticklabels(), visible=True)
+        plt.setp(top.get_xticklabels(), visible=False)
         plt.tight_layout()
         return fig
 
