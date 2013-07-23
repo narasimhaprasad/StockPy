@@ -36,7 +36,7 @@ if __name__ == "__main__":
         topplt.grid(True)
         topymin, topymax = topplt.get_ylim()
         topplt.text(0.05, 0.95, 'Trading price on {}: ${}'.format(enddate,
-                    stkcur), transform=top.transAxes, fontsize=14,
+                    stkcur), transform=topplt.transAxes, fontsize=14,
                     verticalalignment='top', bbox=props)
         topplt.fill_between(stkdata.index, stkdata['Close'],
                             (topymin+0.01)*np.ones(stklen), alpha=0.5)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         sidplt.grid(True)
 
         #Remove xticklabels on top plot
-        plt.setp(top.get_xticklabels(), visible=False)
+        plt.setp(topplt.get_xticklabels(), visible=False)
         plt.tight_layout()
         return fig
 
