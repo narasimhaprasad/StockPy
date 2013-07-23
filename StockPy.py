@@ -15,8 +15,10 @@ def plot_data(stkname, fig, topplt, botplt, sidplt):
     stklen = len(stkdata.index)
     enddate = dt.datetime.date(stkdata.index[stklen-1])
     stkrolmean = pd.rolling_mean(stkdata['Close'], 60)
-    stkmean = stkdata['Close'].mean(1)
+    stkmean = stkdata['Close'].mean(1).round(2)
     stkcur = stkdata['Close'][stklen-1]
+    stkmax = stkdata['Close'].max(1)
+    stkmin = stkdata['Close'].min(1)
 
     #Decoration for annotation of latest trading value
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -28,7 +30,7 @@ def plot_data(stkname, fig, topplt, botplt, sidplt):
 
     #Top plot: Closing data, mean and rolling mean
     topplt.plot(stkdata.index, stkdata['Close'], stkdata.index,
-                stkmean*np.ones(stklen), stkdata.index, stkrolmean)
+                stkmean*np.ones(stklen), stkdata.index, stkrolmean,)
     topplt.set_title('{} Stock Price from {} to {}'.format(stkname,
                      startdate, enddate))
     topplt.grid(True)
@@ -38,6 +40,8 @@ def plot_data(stkname, fig, topplt, botplt, sidplt):
                 verticalalignment='top', bbox=props)
     topplt.fill_between(stkdata.index, stkdata['Close'],
                         (topymin+0.01)*np.ones(stklen), alpha=0.5)
+    topplt.legend(('Close', 'Mean', 'Rolling Average'), 'lower right',
+                  shadow=True, fancybox=True, fontsize=8)
 
     #Bottom plot: Bar Graph, trading volume
     botplt.bar(stkdata.index, stkdata['Volume'])
@@ -47,6 +51,11 @@ def plot_data(stkname, fig, topplt, botplt, sidplt):
     sidplt.hist(stkdata['High']-stkdata['Low'], bins=50, normed=True)
     sidplt.set_title('Stock Value Variation')
     sidplt.grid(True)
+    sidplt.text(0.70, 0.50, '{} Trading Value Stats\nMean:${}\nHighest:${}'
+                '\nLowest:${}'.format(stkname, stkmean, stkmax, stkmin),
+                transform=sidplt.transAxes, fontsize=12,
+                verticalalignment='top', horizontalalignment='center',
+                bbox=props)
 
     #Remove xticklabels on top plot
     plt.setp(topplt.get_xticklabels(), visible=False)
@@ -61,12 +70,13 @@ def setup():
     top = plt.subplot(221)
     bot = plt.subplot(223, sharex=top)
     sid = plt.subplot(122)
+#    top.fmt_xdata = lambda x: "{0:f}".format(x)
 
     fig = plot_data('GOOG', fig, top, bot, sid)
 
     #Setup for radio bottoms
     axcolor = 'lightgoldenrodyellow'
-    prop_radio = plt.axes([0.95, 0.9, 0.05, 0.1], axisbg=axcolor)
+    prop_radio = plt.axes([0.95, 0.9, 0.048, 0.1], axisbg=axcolor)
     radio = wd.RadioButtons(prop_radio, ('GOOG', 'MSFT', 'YHOO', 'GE'))
 
     return [fig, top, bot, sid, radio]
@@ -74,6 +84,7 @@ def setup():
 if __name__ == "__main__":
     fig, top, bot, sid, radio = setup()
 
+    #Setup multicursor between top and bottom plot
     multi = wd.MultiCursor(fig.canvas, (top, bot), color='r', lw=2)
 
     def stocksel(label):
