@@ -14,7 +14,7 @@ def plot_data(stkname, fig, topplt, botplt, sidplt):
     stkdata = web.DataReader(stkname, 'yahoo', startdate)
     stklen = len(stkdata.index)
     enddate = dt.datetime.date(stkdata.index[stklen-1])
-    stkrolmean = pd.rolling_mean(stkdata['Close'], 60)
+    stkrolmean = pd.ewma(stkdata['Close'], 60)
     stkmean = stkdata['Close'].mean(1).round(2)
     stkcur = stkdata['Close'][stklen-1]
     stkmax = stkdata['Close'].max(1)
@@ -40,8 +40,8 @@ def plot_data(stkname, fig, topplt, botplt, sidplt):
                 verticalalignment='top', bbox=props)
     topplt.fill_between(stkdata.index, stkdata['Close'],
                         (topymin+0.01)*np.ones(stklen), alpha=0.5)
-    topplt.legend(('Close', 'Mean', 'Rolling Average'), 'lower right',
-                  shadow=True, fancybox=True, fontsize=8)
+    topplt.legend(('Close', 'Mean', 'EWMA'), 'lower right', shadow=True,
+                  fancybox=True, fontsize=8)
 
     #Bottom plot: Bar Graph, trading volume
     botplt.bar(stkdata.index, stkdata['Volume'])
@@ -70,14 +70,15 @@ def setup():
     top = plt.subplot(221)
     bot = plt.subplot(223, sharex=top)
     sid = plt.subplot(122)
-#    top.fmt_xdata = lambda x: "{0:f}".format(x)
 
-    fig = plot_data('GOOG', fig, top, bot, sid)
+    stklst = sorted(('AMZN', 'GE', 'GOOG', 'MSFT', 'YHOO', 'EBAY'))
+    fig = plot_data(stklst[0], fig, top, bot, sid)
 
     #Setup for radio bottoms
     axcolor = 'lightgoldenrodyellow'
-    prop_radio = plt.axes([0.95, 0.9, 0.048, 0.1], axisbg=axcolor)
-    radio = wd.RadioButtons(prop_radio, ('GOOG', 'MSFT', 'YHOO', 'GE'))
+    ylen = len(stklst)/50.0
+    prop_radio = plt.axes([0.95, 1-ylen, 0.048, ylen], axisbg=axcolor)
+    radio = wd.RadioButtons(prop_radio, stklst)
 
     return [fig, top, bot, sid, radio]
 
@@ -92,5 +93,5 @@ if __name__ == "__main__":
 
     radio.on_clicked(stocksel)
 
-   #Show plot
+    #Show plot
     plt.show()
