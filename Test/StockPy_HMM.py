@@ -8,13 +8,11 @@ import sklearn.hmm as lrn
 
 
 def stkHMM(lrndata, n_components):
-    print "fitting to HMM and decoding\n"
-    model = lrn.GaussianHMM(n_components, covariance_type="tied", n_iter=200)
+    model = lrn.GaussianHMM(n_components, covariance_type="tied", n_iter=20)
     model.fit([lrndata])
 
     hidden_states = model.predict(lrndata)
-    print "done\n"
-    return hidden_states
+    return [model, hidden_states]
 
 
 def plot_data(stkname, fig, topplt, botplt, mlrnplt, sidplt):
@@ -30,9 +28,12 @@ def plot_data(stkname, fig, topplt, botplt, mlrnplt, sidplt):
     stkcur = stkdata['Close'][stklen-1]
     stkmax = stkdata['Close'].max(1)
     stkmin = stkdata['Close'].min(1)
-    stkmchnlrndata = np.column_stack([stkrolmean, stkdata['Volume']])
-    ncomponents = 3
-    hiddenstates = stkHMM(stkmchnlrndata, ncomponents)
+    stkmchnlrndata = np.column_stack([stkdata['Close'], stkdata['Volume']])
+    ncomponents = 5
+    lrnmodel, hiddenstates = stkHMM(stkmchnlrndata, ncomponents)
+    nxtstateidx = lrnmodel.transmat_[hiddenstates[len(hiddenstates)-1], :]
+    nxtstateprob = np.amax(nxtstateidx)
+    nxtstate = np.argmax(nxtstateidx)
 
     #Decoration for annotation of latest trading value
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -66,9 +67,15 @@ def plot_data(stkname, fig, topplt, botplt, mlrnplt, sidplt):
     for i in xrange(ncomponents):
         idx = (hiddenstates == i)
         mlrnplt.plot_date(stkdata.index[idx], stkdata['Close'][idx], 'o',
-                          label='{}dth hidden state'.format(i))
-    mlrnplt.legend(loc=9, fancybox=True, shadow=True, fontsize=8)
+                          label='Hidden state: {}'.format(i))
+    mlrnplt.legend(loc='best', fancybox=True, shadow=True, fontsize=8)
     mlrnplt.grid(True)
+    mlrnplt.text(0.99, 0.1,
+                 'Next State: {} with {:.2f}% probability'
+                 .format(nxtstate, nxtstateprob*100),
+                 transform=mlrnplt.transAxes, fontsize=10,
+                 horizontalalignment='right', verticalalignment='center',
+                 bbox=props)
     mlrnplt.set_title('Hidden Markov Model States')
 
     #Side plot: histogram of 'high-low'
@@ -83,12 +90,13 @@ def plot_data(stkname, fig, topplt, botplt, mlrnplt, sidplt):
 
     #Remove xticklabels on top plot
     plt.setp(topplt.get_xticklabels(), visible=False)
+    plt.setp(botplt.get_xticklabels(), visible=False)
     plt.tight_layout()
     return fig
 
 
 def setup():
-    stklst = sorted(('AMZN', 'GE', 'GOOG', 'MSFT', 'YHOO', 'EBAY'))
+    stklst = sorted(('ABB', 'AMZN', 'GE', 'GOOG', 'MSFT', 'YHOO', 'EBAY'))
 
     #Setup figure
     #Top, Bottom, Side with top and bottom plot sharing x axis
@@ -112,7 +120,7 @@ if __name__ == "__main__":
     fig, top, bot, sid, mlrn, radio = setup()
 
     #Setup multicursor between top and bottom plot
-    multi = wd.MultiCursor(fig.canvas, (top, bot), color='r', lw=2)
+    multi = wd.MultiCursor(fig.canvas, (top, bot, mlrn), color='r', lw=2)
 
     def stocksel(label):
         plot_data(label, fig, top, bot, mlrn, sid)
