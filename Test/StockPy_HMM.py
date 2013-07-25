@@ -102,8 +102,8 @@ def setup():
     #Top, Bottom, Side with top and bottom plot sharing x axis
     fig = plt.figure()
     top = plt.subplot2grid((3, 3), (0, 0), colspan=2)
-    bot = plt.subplot2grid((3, 3), (1, 0), colspan=2)
-    mlrn = plt.subplot2grid((3, 3), (2, 0), colspan=2)
+    bot = plt.subplot2grid((3, 3), (1, 0), colspan=2, sharex=top)
+    mlrn = plt.subplot2grid((3, 3), (2, 0), colspan=2, sharex=top)
     sid = plt.subplot2grid((3, 3), (0, 2), rowspan=3)
 
     fig = plot_data(stklst[0], fig, top, bot, mlrn, sid)
